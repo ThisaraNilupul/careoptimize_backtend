@@ -1,0 +1,30 @@
+#Ignore node modules
+# dependencies
+node_modules/
+
+/.pnp
+.pnp.js
+
+# Ignore environment variable files
+.env
+
+# Ignore logs
+logs
+*.log
+
+# Ignore npm debug files
+npm-debug.log*
+
+# Ignore coverage reports
+coverage/
+
+# Ignore build outputs
+dist/
+build/
+
+# Ignore IDE-specific files (optional)
+.vscode/
+.idea/
+
+# # Ignore lock files (optional)
+# package-lock.json
