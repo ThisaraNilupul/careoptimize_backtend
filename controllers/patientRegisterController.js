@@ -5,9 +5,12 @@ const Patient = require('../models/patientModel');
 //Register new patient
 exports.registerPatient = async (req, res) => {
     const {
-        firstname,
+        firstName,
         lastName, 
-        address, 
+        addressNo,
+        street,
+        city,
+        province,
         nic, 
         phoneNumber, 
         email, 
