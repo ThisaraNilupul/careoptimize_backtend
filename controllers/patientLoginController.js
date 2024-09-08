@@ -4,6 +4,16 @@ const Patient = require('../models/patientModel');
 
 //Login a patient
 exports.loginPatient = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            status: "failed",
+            showQuickNotification: true,
+            message: "Invalied Inputs",
+            error: errors.array(),
+        });
+    }
+
     const { username, password} = req.body;
 
     try{
