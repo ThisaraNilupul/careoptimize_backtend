@@ -1,9 +1,20 @@
+const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/patientModel');
 
 //Register new patient
 exports.registerPatient = async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({
+            status: "failed",
+            showQuickNotification: true,
+            message: "Invalied Inputs",
+            error: errors.array(),
+        });
+    }
+
     const {
         firstName,
         lastName, 
@@ -30,7 +41,7 @@ exports.registerPatient = async (req, res) => {
 
         //create a new patient
         patient = new Patient({
-            firstName, lastName, address, nic, phoneNumber, email, birthday, username, password: hashedpassword
+            firstName, lastName, addressNo, street, city, province, nic, phoneNumber, email, birthday, username, password: hashedpassword
         });
 
         await patient.save();
