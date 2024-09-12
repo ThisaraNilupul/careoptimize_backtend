@@ -25,7 +25,8 @@ exports.registerPatient = async (req, res) => {
         nic, 
         phoneNumber, 
         email, 
-        birthday, 
+        birthday,
+        gender,
         username, 
         password
     } = req.body;
@@ -41,7 +42,7 @@ exports.registerPatient = async (req, res) => {
 
         //create a new patient
         patient = new Patient({
-            firstName, lastName, addressNo, street, city, province, nic, phoneNumber, email, birthday, username, password: hashedpassword
+            firstName, lastName, addressNo, street, city, province, nic, phoneNumber, email, birthday, gender, username, password: hashedpassword
         });
 
         await patient.save();
