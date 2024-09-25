@@ -2,7 +2,7 @@ const express = require('express');
 const { check } = require('express-validator');
 const {registerPatient} = require('../controllers/patientRegisterController');
 const {loginPatient} = require('../controllers/patientLoginController');
-const {getPatientProfile} = require('../controllers/patientControllers');
+const {getPatientProfile, addMedicalBioData, getMedicalBio, addrelative, getRelatives} = require('../controllers/patientControllers');
 const auth = require('../middleware/auth');
 
 const router = express.Router();
@@ -37,6 +37,24 @@ router.post('/login',
     );
 
 // Get patient profile (Protected route)
-router.get('/profile', auth, getPatientProfile);
+// router.get('/profile', auth, getPatientProfile);
+
+
+//Patient's Profile
+//Get patient's profile
+router.get('/profile/:id', getPatientProfile);
+
+//Add patient's Medical-Bio data
+router.put('/profile/:id/medical-bio', addMedicalBioData);
+
+//get patient's Medical-Bio data
+router.get('/profile/:id/medical-bio', getMedicalBio);
+
+//Add patient's relatives
+router.post('/profile/:id/relative', addrelative);
+
+//get all patient's relatives
+router.get('/profile/:id/relatives', getRelatives);
+
 
 module.exports = router;
