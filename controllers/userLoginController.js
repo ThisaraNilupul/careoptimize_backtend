@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Patient = require('../models/patientModel');
+const User = require('../models/userModel');
 
 //Login a patient
-exports.loginPatient = async (req, res) => {
+exports.loginUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -19,17 +19,17 @@ exports.loginPatient = async (req, res) => {
 
     try{
         //find the patient by username
-        let patient = await Patient.findOne({ username });
-        if (!patient) return res.status(400).json({msg: 'Invalid Username'});
+        let user = await User.findOne({ username });
+        if (!user) return res.status(400).json({msg: 'Invalid Username'});
 
         //compare the password
-        const isMatch = await bcrypt.compare(password, patient.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({msg: 'Invalid password'});
 
         //generate token
-        const token = jwt.sign({id: patient.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+        const token = jwt.sign({id: user.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
 
-        res.json({token});
+        res.json({token, userId: user._id, role: user.role, firstName: user.firstName, lastName: user.lastName});
     } catch (error) {
         console.error(error.message);
         res.status(500).send('Server error');

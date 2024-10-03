@@ -1,10 +1,10 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Patient = require('../models/patientModel');
+const User = require('../models/userModel');
 
-//Register new patient
-exports.registerPatient = async (req, res) => {
+//Register new user
+exports.registerUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -16,6 +16,7 @@ exports.registerPatient = async (req, res) => {
     }
 
     const {
+        role,
         firstName,
         lastName, 
         addressNo,
@@ -33,22 +34,23 @@ exports.registerPatient = async (req, res) => {
 
     try{
         //check if the username or email allready exists
-        let patient = await Patient.findOne({username});
-        if (patient) return res.status(400).json({msg: 'Username already exists.'});
+        let user = await User.findOne({username});
+        if (user) return res.status(400).json({msg: 'Username already exists.'});
 
         //hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedpassword = await bcrypt.hash(password, salt);
 
         //create a new patient
-        patient = new Patient({
-            firstName, lastName, addressNo, street, city, province, nic, phoneNumber, email, birthday, gender, username, password: hashedpassword
+        user = new User({
+            role, firstName, lastName, addressNo, street, city, province, nic, phoneNumber, email, birthday, gender, username, password: hashedpassword,
+            relatives: []
         });
 
-        await patient.save();
+        await user.save();
 
         //generate tocken
-        const token = jwt.sign({ id: patient.id}, process.env.JWT_SECRET, { expiresIn: '1h'});
+        const token = jwt.sign({ id: user.id}, process.env.JWT_SECRET, { expiresIn: '1h'});
 
         res.status(200).json({token, msg: 'Registered successfully..!'})
 

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Patient = require('../models/patientModel');
+const Patient = require('../models/userModel');
+
 
 
 //get patient profile
@@ -34,8 +35,8 @@ exports.editPatientProfile = async (req, res) => {
         patient.province = province || patient.province;
         patient.phoneNumber = phoneNumber || patient.phoneNumber;
         patient.email = email || patient.email;
-        patient.height = height || patient.height;
-        patient.weight = weight || patient.weight;
+        patient.biodata.height = height || patient.biodata.height;
+        patient.biodata.weight = weight || patient.biodata.weight;
 
         await patient.save();
         res.status(200).json({msg: 'Patient details updated successfully', patient});
@@ -53,9 +54,14 @@ exports.addMedicalBioData = async (req, res) => {
         if(!patient){
             return res.status(404).json({msg: 'Patient not found'});
         }
-        patient.bloodType = bloodType || patient.bloodType;
-        patient.height = height || patient.height;
-        patient.weight = weight || patient.weight;
+
+        if (!patient.biodata) {
+            patient.biodata = {};
+        }
+
+        patient.biodata.bloodType = bloodType || patient.biodata.bloodType;
+        patient.biodata.height = height || patient.biodata.height;
+        patient.biodata.weight = weight || patient.biodata.weight;
 
         await patient.save();
         res.status(200).json({msg: 'Medical bio-data updated successfully', patient});
@@ -74,9 +80,9 @@ exports.getMedicalBio = async (req, res) => {
         }
 
         const medicalBioData = {
-            bloodType: patient.bloodType,
-            height: patient.height,
-            weight: patient.weight,
+            bloodType: patient.biodata.bloodType,
+            height: patient.biodata.height,
+            weight: patient.biodata.weight,
             healthIssues: patient.healthIssues
         }
 
