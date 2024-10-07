@@ -28,7 +28,7 @@ const biodataSchema = new mongoose.Schema({
 
 ////sub-schema for hospital-info
 const hospitalinfoSchema = new mongoose.Schema({
-    palceName: { type: String, required: true },
+    placeName: { type: String, required: true },
     h_addressNo: { type: String, required: true},
     h_street: { type: String, required: true},
     h_city: { type: String, required: true},
