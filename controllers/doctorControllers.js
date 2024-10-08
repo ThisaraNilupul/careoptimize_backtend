@@ -173,3 +173,18 @@ exports.deleteDoctorWorkAt = async (req, res) => {
     }
 }
 
+//get all patients
+exports.getAllPatients = async (req, res) => {
+    try{
+        const patients = await Doctor.find({role: "P"});
+
+        if (!patients || patients.length === 0) {
+            return res.status(404).json({msg: 'No patients found'});
+        }
+
+        res.status(200).json(patients);
+    }catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server error');
+    }
+}
