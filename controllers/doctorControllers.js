@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/userModel');
+const Treatment = require('../models/ongoingTreatmentModel');
 
 //Get doctors's profile
 exports.getDoctorProfile = async (req, res) => {
@@ -186,5 +187,72 @@ exports.getAllPatients = async (req, res) => {
     }catch (error) {
         console.error(error.message);
         res.status(500).send('Server error');
+    }
+}
+
+//add new treatment
+exports. addNewTreatment = async (req, res) => {
+    try{
+        const {
+            patientId,
+            patientName,
+            gender,
+            age,
+            phone,
+            email,
+            diagnosis,
+            diagnosisDescription,
+            prescription,
+            checkups,
+            startDate,
+            endDate,
+            days,
+            treatmentPlans,
+            doctorInfo,
+            hospitalInfo,
+        } = req.body;
+
+        const newTreatment = new Treatment({
+            patientId,
+            patientName,
+            gender,
+            age,
+            phone,
+            email,
+            diagnosis,
+            diagnosisDescription,
+            prescription,
+            checkups,
+            startDate,
+            endDate,
+            days,
+            treatmentPlans,
+            doctorInfo,
+            hospitalInfo,
+        });
+
+        await newTreatment.save();
+
+        res.status(200).json({ msg: 'New treatment added successfully', treatment: newTreatment });
+    } catch (error) {
+        console.error('Error adding treatment:', error);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
+
+//get patient's treatments
+exports.getPatientTreatments = async (req, res) => {
+    try{
+        const { patientId } = req.params;
+
+        const treatments = await Treatment.find({ patientId });
+        if (!treatments || treatments.length === 0) {
+            return res.status(404).json({ msg: 'No treatments found for this patient.' });
+        }
+
+        res.status(200).json(treatments);
+    } catch (error) {
+        console.error('Error fetching treatments:', error);
+        res.status(500).json({ error: 'Server error' });
     }
 }
