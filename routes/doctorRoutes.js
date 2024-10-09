@@ -8,7 +8,9 @@ const { getDoctorProfile,
         editDoctorWorkAt,
         getDoctorWorkAt,
         deleteDoctorWorkAt,
-        getAllPatients
+        getAllPatients,
+        addNewTreatment,
+        getPatientTreatments
  } = require('../controllers/doctorControllers');
  const auth = require('../middleware/auth');
 
@@ -40,6 +42,14 @@ router.delete('/profile/:id/work-at/:wid', deleteDoctorWorkAt);
 
 //get all patients
 router.get('/add-teatment/all-patients', getAllPatients);
+
+
+
+//add new treatment
+router.post('/addTreatment', addNewTreatment);
+
+//get patient's all treatments list
+router.get('/treatments/:patientId', getPatientTreatments);
 
 
 module.exports = router;
