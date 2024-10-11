@@ -15,7 +15,9 @@ const {
         getAllHealthIssues,
         deleteHealthIssue,
         updateHealthIssue,
-        getOneHealthIssue
+        getOneHealthIssue,
+        getNotification,
+        updateNotificationMarkAsRead
       } = require('../controllers/patientControllers');
 const auth = require('../middleware/auth');
 
@@ -76,6 +78,12 @@ router.delete('/profile/:id/health-issues/:issueId', deleteHealthIssue);
 
 //update a health issue
 router.put('/profile/:id/health-issues/:issueId', updateHealthIssue);
+
+//notification route
+router.get('/notifications/:userId', getNotification);
+
+//update notification mark as read
+router.patch('/notification/:id', updateNotificationMarkAsRead);
 
 
 module.exports = router;

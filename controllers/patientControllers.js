@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/userModel');
+const Notification = require('../models/notificationModel');
 
 
 
@@ -295,5 +296,42 @@ exports.updateHealthIssue = async (req, res) => {
         res.status(200).json({ msg: 'Health issue updated successfully', healthIssues: patient.healthIssues });
     }catch (error){
         res.status(500).json({ error: 'Server error' });
+    }
+}
+
+//get notifications
+exports.getNotification = async (req, res) => {
+    const { userId } = req.params;
+    console.log('Fetching notifications for userId:', userId);
+    
+    try{
+        const notifications = await Notification.find({ userId: userId.trim() }).sort({ date: -1 });
+
+        if (!notifications || notifications.length === 0) {
+            return res.status(404).json({ message: 'No notifications found for this user.' });
+        }
+
+        res.status(200).json(notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ error: 'Error fetching notifications' });
+    }
+}
+
+//update notification mark as read
+exports.updateNotificationMarkAsRead = async (req, res) => {
+    const { id } = req.params;
+
+    try{
+        const notification = await Notification.findByIdAndUpdate(id, { read: true }, { new: true });
+
+        if (!notification) {
+            return res.status(404).json({ msg: 'Notification not found' })
+        }
+
+        res.status(200).json({ msg: 'Notification marked as read', notification});
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 }

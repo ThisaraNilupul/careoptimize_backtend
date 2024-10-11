@@ -2,6 +2,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/userModel');
 const Treatment = require('../models/ongoingTreatmentModel');
+const { 
+    scheduleTreatmentStartNotification,
+    scheduleTreatmentEndNotification, 
+    scheduleCheckupNotifications, 
+    scheduleTreatmentPlanNotifications 
+} = require('../config/notificationService');
 
 //Get doctors's profile
 exports.getDoctorProfile = async (req, res) => {
@@ -232,6 +238,11 @@ exports. addNewTreatment = async (req, res) => {
         });
 
         await newTreatment.save();
+
+        scheduleTreatmentStartNotification(newTreatment);
+        scheduleTreatmentEndNotification(newTreatment);
+        scheduleCheckupNotifications(newTreatment);
+        scheduleTreatmentPlanNotifications(newTreatment);
 
         res.status(200).json({ msg: 'New treatment added successfully', treatment: newTreatment });
     } catch (error) {
