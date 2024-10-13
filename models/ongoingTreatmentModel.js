@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const checkupSchema = new mongoose.Schema({
     testName: {type: String },
     evaluationDate: { type: Date },
+    evaluated: { type: Boolean, default: false }
 });
 
 //sub-schema for treatment plan
@@ -17,6 +18,7 @@ const treatmentPlanSchema = new mongoose.Schema({
 
 //schema for doctor info
 const doctorsInfoSchema = new mongoose.Schema({
+    doctorId: { type: String, required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     title: { type: String },
