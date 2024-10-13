@@ -10,9 +10,12 @@ const { getDoctorProfile,
         deleteDoctorWorkAt,
         getAllPatients,
         addNewTreatment,
-        getPatientTreatments
+        getPatientTreatments,
+        submitCheckupFeedback,
+        closeTreatmentAndAddMedicalHistory
  } = require('../controllers/doctorControllers');
  const auth = require('../middleware/auth');
+const { FeedbackInstance } = require('twilio/lib/rest/assistants/v1/assistant/feedback');
 
 const router = express.Router();
 
@@ -50,6 +53,15 @@ router.post('/addTreatment', addNewTreatment);
 
 //get patient's all treatments list
 router.get('/treatments/:patientId', getPatientTreatments);
+
+//close a treatment and add to the medical history
+router.post('/closeTreatment', closeTreatmentAndAddMedicalHistory);
+
+
+//add checkup FeedbackInstance
+router.post('/checkup/feedback', submitCheckupFeedback);
+
+
 
 
 module.exports = router;

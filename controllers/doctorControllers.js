@@ -2,6 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Doctor = require('../models/userModel');
 const Treatment = require('../models/ongoingTreatmentModel');
+const Checkup = require('../models/medicalCheckupsModel');
+const MedicalHistory = require('../models/medicalHistoryModel');
+const TreatmentLog = require('../models/treatmentLogModel');
 const { 
     scheduleTreatmentStartNotification,
     scheduleTreatmentEndNotification, 
@@ -239,10 +242,15 @@ exports. addNewTreatment = async (req, res) => {
 
         await newTreatment.save();
 
-        scheduleTreatmentStartNotification(newTreatment);
-        scheduleTreatmentEndNotification(newTreatment);
-        scheduleCheckupNotifications(newTreatment);
-        scheduleTreatmentPlanNotifications(newTreatment);
+        try{       
+            scheduleTreatmentStartNotification(newTreatment);
+            scheduleTreatmentEndNotification(newTreatment);
+            scheduleCheckupNotifications(newTreatment);
+            scheduleTreatmentPlanNotifications(newTreatment);
+        }catch (err) {
+            console.error('Error sheduling notifications:', err);
+            res.status(500).json({ error: 'Server error' });
+        }
 
         res.status(200).json({ msg: 'New treatment added successfully', treatment: newTreatment });
     } catch (error) {
@@ -265,5 +273,106 @@ exports.getPatientTreatments = async (req, res) => {
     } catch (error) {
         console.error('Error fetching treatments:', error);
         res.status(500).json({ error: 'Server error' });
+    }
+}
+
+//close a treatment and add to the medical history
+exports.closeTreatmentAndAddMedicalHistory = async (req, res) => {
+    const { treatmentId, reason, closedDate, addTOMedicalHistory } = req.body;
+
+    try {
+        const treatment = await Treatment.findById(treatmentId);
+        if (!treatment) {
+            return res.status(404).json({ msg: 'Treatment not found.' });
+        }
+
+        if (addTOMedicalHistory) {
+            const newMedicalHistory = new MedicalHistory({
+                patientId: treatment.patientId,
+                doctorReason: reason,
+                treatmentInfo: treatment,
+                closedDate,
+            });
+
+            await newMedicalHistory.save();
+        }
+
+        const newTeratmentLog = new TreatmentLog({
+            treatmentId: treatmentId,
+            doctorReason: reason,
+            closingDate: closedDate,
+        });
+        
+        await newTeratmentLog.save();
+
+        await Treatment.findByIdAndDelete(treatmentId);
+          
+        res.status(200).json({msg: 'Treatment closed successfully.'});
+    } catch (error) {
+        console.error('Error closing treatment:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+}
+
+//add checkup feedback
+exports.submitCheckupFeedback = async (req, res) => {
+    const {
+        userId,
+        assignById,
+        assignByfirstName,
+        assignBylastName,
+        treatmentId,
+        evaluateById,
+        evaluateByfirstName,
+        evaluateBylastName,
+        testName,
+        status,
+        feedback,
+    } = req.body;
+
+    try {
+        const newCheckupfeedback = new Checkup({
+            userId,
+            assignById,
+            assignByfirstName,
+            assignBylastName,
+            treatmentId,
+            evaluateById,
+            evaluateByfirstName,
+            evaluateBylastName,
+            testName,
+            status,
+            feedback,
+            read: true
+        });
+
+        await newCheckupfeedback.save();
+
+        const treatment = await Treatment.findOne({_id: treatmentId});
+        console.log("Checkups: ", treatment.checkups);
+        if (!treatment) {
+            return res.status(404).json({ msg: 'Treatment not found' });
+        }
+
+        if (!Array.isArray(treatment.checkups)) {
+            return res.status(404).json({ msg: 'No checkups found in treatment' });
+        }
+
+        const checkupIndex = treatment.checkups.findIndex(
+            (checkup) => checkup.testName === testName
+        );
+
+        if (checkupIndex === -1) {
+            return res.status(404).json({ msg: 'This Checkup not found in treatment' });
+        }
+
+        treatment.checkups[checkupIndex].evaluated = true;
+
+        await treatment.save();
+
+        res.status(200).json({ msg: 'Checkup feedback submitted successfully'});
+    } catch (error) {
+        console.error('Error submitting feedback:', error);
+        res.status(500).json({ msg: 'Failed to submit feedback' });
     }
 }

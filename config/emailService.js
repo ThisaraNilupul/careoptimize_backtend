@@ -1,18 +1,24 @@
 const nodemailer = require('nodemailer');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
-        user: "h.t.n.11739@usci.ruh.ac.lk",
-        pass: "993440370V"
+        user: process.env.USEREMAIL,
+        pass: process.env.PASSWORD
     }
 });
 
-function sendEmailNotofication(email, message) {
+function sendEmailNotification(email, message) {
+
+    console.log(process.env.USEREMAIL, process.env.PASSWORD);
+
     const mailOption = {
-        from: 'h.t.n.11739@usci.ruh.ac.lk',
+        from: process.env.USEREMAIL,
         to: email,
-        subject: 'CareOptimize-Healthcare Notification',
+        subject: 'CareOptimize Notification',
         text: message
     };
 
@@ -20,10 +26,10 @@ function sendEmailNotofication(email, message) {
         if(error) {
             console.error('Error sending email:', error);
         }else {
-            onsole.log('Email sent:', info.response);
+            console.log('Email sent:', info.response);
         }
 
     });
 }
 
-module.exports = { sendEmailNotofication };
+module.exports = { sendEmailNotification };
