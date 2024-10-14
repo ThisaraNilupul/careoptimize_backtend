@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/userModel');
 const Notification = require('../models/notificationModel');
+const MedicalHistory = require('../models/medicalHistoryModel');
 
 
 
@@ -333,5 +334,22 @@ exports.updateNotificationMarkAsRead = async (req, res) => {
     } catch (error) {
         console.error('Error marking notification as read:', error);
         res.status(500).json({ message: 'Server error' });
+    }
+}
+
+//get all treatments history
+exports.getAllTreatmetHistory = async (req, res) => {
+    const { patientId } = req.params;
+
+    try{
+        const medicalHistory = await MedicalHistory.find({ patientId });
+        if (!medicalHistory || medicalHistory.length === 0) {
+            return res.status(404).json({msg: 'No medical history found for this patient.'});
+        }
+
+        res.status(200).json(medicalHistory);
+    } catch (errorr){
+        console.error('Error fetching medical history:', error);
+        res.status(500).json({ message: 'Server error. Unable to fetch medical history.' });
     }
 }
