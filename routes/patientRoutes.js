@@ -17,7 +17,8 @@ const {
         updateHealthIssue,
         getOneHealthIssue,
         getNotification,
-        updateNotificationMarkAsRead
+        updateNotificationMarkAsRead,
+        getAllTreatmetHistory
       } = require('../controllers/patientControllers');
 const auth = require('../middleware/auth');
 
@@ -84,6 +85,9 @@ router.get('/notifications/:userId', getNotification);
 
 //update notification mark as read
 router.patch('/notification/:id', updateNotificationMarkAsRead);
+
+//get all medical treatments history
+router.get('/medical-history/:patientId', getAllTreatmetHistory);
 
 
 module.exports = router;
