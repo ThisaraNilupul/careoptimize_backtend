@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const Patient = require('../models/userModel');
 const Notification = require('../models/notificationModel');
 const MedicalHistory = require('../models/medicalHistoryModel');
+const CheckupsHistory = require('../models/medicalCheckupsModel');
 
 
 
@@ -319,6 +320,24 @@ exports.getNotification = async (req, res) => {
     }
 }
 
+//get unread notifications
+exports.getUnreadNotifications = async (req, res) => {
+    const { userId } = req.params;
+
+    try{
+        const unreadNotifications = await Notification.find({ userId: userId.trim(), read: false }).sort({ date: -1 });
+
+        if (!unreadNotifications || unreadNotifications.length === 0) {
+            return res.status(404).json({ message: 'No unread notifications found for this user.' });
+        }
+
+        res.status(200).json(unreadNotifications);
+    } catch (error) {
+        console.error('Error fetching unread notifications:', error);
+        res.status(500).json({ error: 'Error fetching unread notifications' });
+    }
+}
+
 //update notification mark as read
 exports.updateNotificationMarkAsRead = async (req, res) => {
     const { id } = req.params;
@@ -348,8 +367,94 @@ exports.getAllTreatmetHistory = async (req, res) => {
         }
 
         res.status(200).json(medicalHistory);
-    } catch (errorr){
+    } catch (error){
         console.error('Error fetching medical history:', error);
         res.status(500).json({ message: 'Server error. Unable to fetch medical history.' });
+    }
+}
+
+//get filtered treatment history
+exports.getFilteredTreatmentHistory = async (req, res) => {
+    const { patientId } = req.params;
+    const { year, startDate, endDate } = req.query;
+
+    try {
+        let filter = { patientId};
+
+        if (year) {
+            const startOfYear = new Date(`${year}-01-01T00:00:00Z`);
+            const endOfYear = new Date(`${year}-12-31T23:59:59Z`);
+            filter.closedDate = { $gte: startOfYear, $lte: endOfYear };
+        }
+
+        if (startDate && endDate) {
+            filter.closedDate = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+              };
+        }
+
+        const medicalHistory = await MedicalHistory.find(filter);
+
+        if (!medicalHistory.length) {
+            return res.status(404).json({ msg: 'No medical history found for the given filter.' });
+          }
+
+        res.status(200).json(medicalHistory);  
+    } catch (error) {
+        console.error('Error fetching medical history:', error);
+        res.status(500).json({ msg: 'An error occurred while fetching medical history.', error });
+  
+    }
+}
+
+//get all medical checkups history
+exports.getAllCheckupsHistory = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const checkupsHistory = await CheckupsHistory.find({ userId });
+        if (!checkupsHistory || checkupsHistory.length === 0 ) {
+            return res.status(404).json({ msg: 'No checkups history found for this patient.'});
+        }
+
+        res.status(200).json(checkupsHistory);
+    } catch (error) {
+        console.error('Error fetching checkups history: ', error);
+        res.status(500).json({msg: 'Serever error, Unable to fetch checkups history'});
+    }
+}
+
+//get filtered checkups history
+exports.getFilteredCheckupsHistory = async (req, res) => {
+    const { patientId } = req.params;
+    const { year, startDate, endDate } = req.query;
+
+    try {
+        let filter = { userId: patientId };
+
+        if (year) {
+            const startOfYear = new Date(`${year}-01-01T00:00:00Z`);
+            const endOfYear = new Date(`${year}-12-31T23:59:59Z`);
+            filter.createdAt = { $gte: startOfYear, $lte: endOfYear };
+        }
+
+        if (startDate && endDate) {
+            filter.createdAt = {
+                $gte: new Date(startDate),
+                $lte: new Date(endDate),
+              };
+        }
+
+        const checkupHistory = await CheckupsHistory.find(filter);
+
+        if (!checkupHistory.length) {
+            return res.status(404).json({ msg: 'No checkup history found for the given filter.' });
+          }
+
+        res.status(200).json(medicalHistory);  
+    } catch (error) {
+        console.error('Error fetching checkup history:', error);
+        res.status(500).json({ msg: 'An error occurred while fetching checkup history.', error });
     }
 }
