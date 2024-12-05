@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const moment = require('moment');
 const Notification = require('../models/notificationModel');
+const { sendEmailNotification } = require('./emailService');
 
 //save nofications to database
 async function saveNotification(userId, category, message) {
@@ -14,8 +15,9 @@ async function saveNotification(userId, category, message) {
 }
 
 //function to send notification
-function sendNotification(userId, category, message) {
+function sendNotification(userId, category, email, message) {
     saveNotification(userId, category, message);
+    sendEmailNotification(email, message);
 }
 
 
@@ -34,7 +36,7 @@ function scheduleTreatmentStartNotification(treatment) {
         const createdDate = new Date(treatment.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
         const message = `You got assigned a new on-going treatment plan on ${createdDate}, Go checkout.`;
         console.log('S-Cron job started.', message);
-        sendNotification(treatment.patientId, category, message);
+        sendNotification(treatment.patientId, category, treatment.email, message);
 
         job.stop();
         console.log('S-Cron job completed and stopped.');
@@ -54,7 +56,7 @@ function scheduleTreatmentEndNotification(treatment) {
     const job = cron.schedule(cronExpressione, () => {
         const endingDate = new Date(treatment.endDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
         const message = `Reminder: Your treatment(dignosis name: ${treatment.diagnosis}) ends on ${endingDate}. Please make a new appointment.`;
-        sendNotification(treatment.patientId, category, message);
+        sendNotification(treatment.patientId, category, treatment.email, message);
 
         job.stop();
         console.log('E-Cron job completed and stopped.');
@@ -80,7 +82,7 @@ function scheduleCheckupNotifications(treatment) {
             const addedDate = new Date(treatment.createdAt).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
             const evaluateDate = new Date(checkup.evaluationDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
             const message = `Reminder: On ${addedDate}, Your doctor assigned you to get a "${checkup.testName}" checkup, Please make sure to get this done on or before ${evaluateDate}.`;
-            sendNotification(treatment.patientId, category, message);
+            sendNotification(treatment.patientId, category, treatment.email, message);
 
             jobone.stop();
             console.log('C-one-Cron job completed and stopped.');
@@ -89,7 +91,7 @@ function scheduleCheckupNotifications(treatment) {
         const jobtwo = cron.schedule(cronExpressiontwo, () => {
             const evaluateDate = new Date(treatment.evaluationDate).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'});
             const message = `Reminder: You have to evaluate your ${checkup.testName} results on ${evaluateDate}. Please make an appointment.`;
-            sendNotification(treatment.patientId, category, message);
+            sendNotification(treatment.patientId, category, treatment.email, message);
 
             jobtwo.stop();
             console.log('c-two-Cron job completed and stopped.');
@@ -121,7 +123,7 @@ function scheduleTreatmentPlanNotifications(treatment) {
                 const treatmentJob = cron.schedule(cronTime, () => {
                     const now = moment();
                     if(now.isBetween(startDate, endDate, null, '[]')){
-                        sendNotification(treatment.patientId, category, message);
+                        sendNotification(treatment.patientId, category, treatment.email, message);
                     } else {
                         treatmentJob.stop();
                         console.log('T-Cron job completed and stopped.');

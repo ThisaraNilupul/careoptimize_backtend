@@ -18,7 +18,11 @@ const {
         getOneHealthIssue,
         getNotification,
         updateNotificationMarkAsRead,
-        getAllTreatmetHistory
+        getAllTreatmetHistory,
+        getAllCheckupsHistory,
+        getFilteredTreatmentHistory,
+        getFilteredCheckupsHistory,
+        getUnreadNotifications
       } = require('../controllers/patientControllers');
 const auth = require('../middleware/auth');
 
@@ -83,11 +87,24 @@ router.put('/profile/:id/health-issues/:issueId', updateHealthIssue);
 //notification route
 router.get('/notifications/:userId', getNotification);
 
+//get unread notifications
+router.get('/notifications/unread/:userId', getUnreadNotifications);
+
 //update notification mark as read
 router.patch('/notification/:id', updateNotificationMarkAsRead);
 
 //get all medical treatments history
 router.get('/medical-history/:patientId', getAllTreatmetHistory);
+
+//get filterd medical treatment history
+router.get('/filtered-medical-history/:patientId', getFilteredTreatmentHistory);
+
+//get all medical checkups history
+router.get('/checkups-history/:userId', getAllCheckupsHistory);
+
+//get filterd medical checkups history
+router.get('/filtered-checkups-history/:patientId', getFilteredCheckupsHistory);
+
 
 
 module.exports = router;

@@ -63,7 +63,11 @@ const userSchema = new mongoose.Schema({
     relatives: { type: [relativesSchema], required: function () { return this.role === "P"; }},
 
     workAt : { type: [hospitalinfoSchema], required: function () { return this.role === "D"; }},
-    doctorInfo: {type: doctorinfoSchema, required: false, function () { return this.role === "D"; }}
+    doctorInfo: {type: doctorinfoSchema, required: false, function () { return this.role === "D"; }},
+
+    emailVerified: { type: Boolean, default: false},
+    verificationCode: { type: String },
+    codeGeneratedAt: { type: Date }
 }, {timestamps: true});
 
 
